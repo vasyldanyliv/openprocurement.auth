@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '2.0.1a1.dev1+eauctions'
+version = '2.0.1a1.dev2+eauctions'
 
 setup(name='openprocurement.auth',
       version=version,
