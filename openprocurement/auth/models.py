@@ -8,6 +8,7 @@ from retrying import retry
 from base64 import b64decode
 from libnacl.sign import Signer, Verifier
 from urllib import unquote
+from urlparse import urlparse
 
 GRANT_EXPIRES = 86400
 
@@ -143,10 +144,11 @@ def current_user():
 def current_user_sig():
     if 'bidder_id' in request.args and 'signature' in request.args:
         signature = b64decode(unquote(request.args['signature']))
+        auction_id = re.findall("[0-9a-f]{32}", urlparse(request.args['redirect_uri']).path)[0]
         bidder_id = request.args['bidder_id']
         signer = Signer(current_app.signature_key.decode('hex'))
         verifier = Verifier(signer.hex_vk())
-        if verifier.verify(signature+str(bidder_id)):
+        if verifier.verify(signature+"{}_{}".format(str(auction_id), str(bidder_id))):
             user = User(**{'bidder_id': bidder_id})
             User.save_to_db(user)
             User.set_expire(user)
